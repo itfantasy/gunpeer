@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Photon3Unity3D, Version=4.1.1.17, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>photon\Photon3Unity3D.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -117,16 +121,16 @@
     <Compile Include="3rdParty\WebSocketSharp\WebSocketFrame.cs" />
     <Compile Include="3rdParty\WebSocketSharp\WebSocketState.cs" />
     <Compile Include="error.cs" />
-    <Compile Include="EventData.cs" />
     <Compile Include="gnbuffers\GnBuffer.cs" />
     <Compile Include="gnbuffers\GnParser.cs" />
-    <Compile Include="INodePeerListener.cs" />
     <Compile Include="nets\INetEventListener.cs" />
     <Compile Include="nets\INetWorker.cs" />
     <Compile Include="nets\ws\WSNetWorker.cs" />
     <Compile Include="NodePeer.cs" />
-    <Compile Include="OperationResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="photon\Photon3Unity3D.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

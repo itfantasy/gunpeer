@@ -2,32 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ExitGames.Client.Photon;
 using itfantasy.nodepeer.nets;
 using itfantasy.nodepeer.nets.ws;
 using itfantasy.nodepeer.gnbuffers;
 
 namespace itfantasy.nodepeer
 {
-    public class NodePeer : INetEventListener
+    public class NodePeer : PhotonPeer, INetEventListener
     {
         INetWorker netWorker;
-
-        INodePeerListener listener;
-
         ConnectionProtocol protocolType;
 
         public NodePeer(ConnectionProtocol protocolType)
+            : base(protocolType)
         {
             this.protocolType = protocolType;
         }
 
-        public NodePeer(INodePeerListener listener, ConnectionProtocol protocolType)
+        public NodePeer(IPhotonPeerListener listener, ConnectionProtocol protocolType)
+            : base(listener, protocolType)
         {
             this.protocolType = protocolType;
-            this.listener = listener;
         }
 
-        public virtual bool Connect(string serverAddress, string applicationName)
+        public override bool Connect(string serverAddress, string applicationName)
         {
             var proto = this.protocolToString(this.protocolType);
             var err = this.InitNetWorker(proto, serverAddress);
@@ -40,23 +39,27 @@ namespace itfantasy.nodepeer
             return true;
         }
 
-        public virtual void Disconnect()
+        public override void Disconnect()
         {
             this.netWorker.Close();
         }
 
+        public override void Service()
+        {
+            this.netWorker.Update();
+        }
         
-        public virtual bool OpCustom(byte customOpCode, Dictionary<byte, object> customOpParameters, bool sendReliable)
+        public override bool OpCustom(byte customOpCode, Dictionary<byte, object> customOpParameters, bool sendReliable)
         {
             return this.OpCustom(customOpCode, customOpParameters, sendReliable, 0);
         }
         
-        public virtual bool OpCustom(byte customOpCode, Dictionary<byte, object> customOpParameters, bool sendReliable, byte channelId)
+        public override bool OpCustom(byte customOpCode, Dictionary<byte, object> customOpParameters, bool sendReliable, byte channelId)
         {
             return this.OpCustom(customOpCode, customOpParameters, sendReliable, channelId, false);
         }
         
-        public virtual bool OpCustom(byte customOpCode, Dictionary<byte, object> customOpParameters, bool sendReliable, byte channelId, bool encrypt)
+        public override bool OpCustom(byte customOpCode, Dictionary<byte, object> customOpParameters, bool sendReliable, byte channelId, bool encrypt)
         {
             var buffer = new GnBuffer(1024);
             buffer.PushByte(customOpCode);
@@ -104,7 +107,7 @@ namespace itfantasy.nodepeer
 
         public void OnConn()
         {
-            listener.OnStatusChanged(StatusCode.Connect);
+            this.Listener.OnStatusChanged(StatusCode.Connect);
         }
 
         public void OnMsg(byte[] msg)
@@ -140,7 +143,7 @@ namespace itfantasy.nodepeer
                             break;
                     }
                 }
-                listener.OnOperationResponse(response);
+                Listener.OnOperationResponse(response);
             }
             else if(sign == 1) // event
             {
@@ -169,18 +172,18 @@ namespace itfantasy.nodepeer
                             break;
                     }
                 }
-                listener.OnEvent(eventData);
+                Listener.OnEvent(eventData);
             }
         }
 
         public void OnClose()
         {
-            listener.OnStatusChanged(StatusCode.Disconnect);
+            Listener.OnStatusChanged(StatusCode.Disconnect);
         }
 
         public void OnError(error err)
         {
-            listener.DebugReturn(DebugLevel.ERROR, err.Error());
+            Listener.DebugReturn(DebugLevel.ERROR, err.Error());
         }
 
         private string protocolToString(ConnectionProtocol protocol)
@@ -196,14 +199,5 @@ namespace itfantasy.nodepeer
             }
             return "";
         }
-    }
-
-
-    public enum ConnectionProtocol
-    {
-        Udp = 0,
-        Tcp = 1,
-        WebSocket = 4,
-        //WebSocketSecure = 5,
     }
 }
