@@ -8,9 +8,10 @@ namespace itfantasy.nodepeer.nets
     public interface INetWorker
     {
 	    void Connect(string url, string tag);
-	    void Send(byte[] msg);
-	    void SendAsync(byte[] msg, Action<bool> callback=null);
+        error Send(byte[] msg);
+        error SendAsync(byte[] msg, Action<bool> callback = null);
 	    error BindEventListener(INetEventListener eventListener);
         void Close();
+        void Update();
     }
 }

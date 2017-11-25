@@ -45,7 +45,7 @@ namespace itfantasy.nodepeer.gnbuffers
         public string String()
         {
             int length = this.Int();
-            string ret = BitConverter.ToString(this.buffer, this.offset, length);
+            string ret = System.Text.Encoding.UTF8.GetString(this.buffer, this.offset, length);
             this.offset += length;
             return ret;
         }

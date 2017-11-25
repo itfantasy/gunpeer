@@ -52,7 +52,9 @@ namespace itfantasy.nodepeer.gnbuffers
 
         public byte[] Bytes()
         {
-            return this.buffer;
+            byte[] buf = new byte[this.offset];
+            Buffer.BlockCopy(this.buffer, 0, buf, 0, offset);
+            return buf;
         }
     }
 }

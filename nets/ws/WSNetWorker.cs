@@ -43,14 +43,24 @@ namespace itfantasy.nodepeer.nets.ws
             this.websocket.Connect();
         }
 
-        public void Send(byte[] msg)
+        public error Send(byte[] msg)
         {
+            if(msg.Length > 1015)
+            {
+                return errors.New("the max length of send buffer is 1015 !");
+            }
             this.websocket.Send(msg);
+            return errors.nil;
         }
 
-        public void SendAsync(byte[] msg, Action<bool> callback=null)
+        public error SendAsync(byte[] msg, Action<bool> callback = null)
         {
+            if (msg.Length > 1015)
+            {
+                return errors.New("the max length of send buffer is 1015 !");
+            }
             this.websocket.SendAsync(msg, callback);
+            return errors.nil;
         }
 
         public error BindEventListener(INetEventListener eventListener)
