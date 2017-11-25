@@ -26,11 +26,24 @@ namespace itfantasy.nodepeer
             this.protocolType = protocolType;
         }
 
+        public override bool Connect(string serverAddress, string applicationName, object custom)
+        {
+            var proto = this.protocolToString(this.protocolType);
+            var err = this.InitNetWorker(proto, serverAddress);
+            if (err != errors.nil)
+            {
+                this.OnError(err);
+                return false;
+            }
+            this.netWorker.Connect(proto + "://" + serverAddress, applicationName);
+            return true;
+        }
+
         public override bool Connect(string serverAddress, string applicationName)
         {
             var proto = this.protocolToString(this.protocolType);
             var err = this.InitNetWorker(proto, serverAddress);
-            if(err != errors.nil)
+            if (err != errors.nil)
             {
                 this.OnError(err);
                 return false;
@@ -48,17 +61,17 @@ namespace itfantasy.nodepeer
         {
             this.netWorker.Update();
         }
-        
+
         public override bool OpCustom(byte customOpCode, Dictionary<byte, object> customOpParameters, bool sendReliable)
         {
             return this.OpCustom(customOpCode, customOpParameters, sendReliable, 0);
         }
-        
+
         public override bool OpCustom(byte customOpCode, Dictionary<byte, object> customOpParameters, bool sendReliable, byte channelId)
         {
             return this.OpCustom(customOpCode, customOpParameters, sendReliable, channelId, false);
         }
-        
+
         public override bool OpCustom(byte customOpCode, Dictionary<byte, object> customOpParameters, bool sendReliable, byte channelId, bool encrypt)
         {
             var buffer = new GnBuffer(1024);
@@ -67,19 +80,19 @@ namespace itfantasy.nodepeer
             {
                 buffer.PushByte(kv.Key);
                 Type valType = kv.Value.GetType();
-                if(valType == typeof(byte))
+                if (valType == typeof(byte))
                 {
                     buffer.PushByte((byte)kv.Value);
                 }
-                else if(valType == typeof(int))
+                else if (valType == typeof(int))
                 {
                     buffer.PushInt((int)kv.Value);
                 }
-                else if(valType == typeof(long))
+                else if (valType == typeof(long))
                 {
                     buffer.PushLong((long)kv.Value);
                 }
-                else if(valType == typeof(string))
+                else if (valType == typeof(string))
                 {
                     buffer.PushString(kv.Value.ToString());
                 }
@@ -95,10 +108,11 @@ namespace itfantasy.nodepeer
                 if (proto == "ws")
                 {
                     this.netWorker = new WSNetWorker();
+                    this.netWorker.BindEventListener(this);
                     return errors.nil;
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return errors.New(e.Message);
             }
@@ -145,7 +159,7 @@ namespace itfantasy.nodepeer
                 }
                 Listener.OnOperationResponse(response);
             }
-            else if(sign == 1) // event
+            else if (sign == 1) // event
             {
                 EventData eventData = new EventData();
                 eventData.Code = parser.Byte();
@@ -188,7 +202,7 @@ namespace itfantasy.nodepeer
 
         private string protocolToString(ConnectionProtocol protocol)
         {
-            switch(protocol)
+            switch (protocol)
             {
                 case ConnectionProtocol.Udp:
                     return "udp";
