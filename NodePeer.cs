@@ -57,6 +57,12 @@ namespace itfantasy.nodepeer
             this.netWorker.Close();
         }
 
+        public bool EstablishEncryption()
+        {
+            this.Listener.OnStatusChanged(StatusCode.EncryptionEstablished);
+            return true;
+        }
+
         public override void Service()
         {
             this.netWorker.Update();
