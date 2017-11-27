@@ -50,6 +50,25 @@ namespace itfantasy.nodepeer.gnbuffers
             return ret;
         }
 
+        public object Object()
+        {
+            char c = (char)this.Byte();
+            switch (c)
+            {
+                case 'b':
+                    return this.Byte();
+                case 't':
+                    return this.Short();
+                case 'i':
+                    return this.Int();
+                case 'l':
+                    return this.Long();
+                case 's':
+                    return this.String();
+            }
+            return null;
+        }
+
         public bool OverFlow()
         {
             return this.offset >= this.buffer.Length;   

@@ -85,23 +85,7 @@ namespace itfantasy.nodepeer
             foreach (KeyValuePair<byte, object> kv in customOpParameters)
             {
                 buffer.PushByte(kv.Key);
-                Type valType = kv.Value.GetType();
-                if (valType == typeof(byte))
-                {
-                    buffer.PushByte((byte)kv.Value);
-                }
-                else if (valType == typeof(int))
-                {
-                    buffer.PushInt((int)kv.Value);
-                }
-                else if (valType == typeof(long))
-                {
-                    buffer.PushLong((long)kv.Value);
-                }
-                else if (valType == typeof(string))
-                {
-                    buffer.PushString(kv.Value.ToString());
-                }
+                buffer.PushObject(kv.Value);
             }
             this.netWorker.SendAsync(buffer.Bytes());
             return true;
@@ -143,25 +127,7 @@ namespace itfantasy.nodepeer
                 while (!parser.OverFlow())
                 {
                     byte key = parser.Byte();
-                    byte type = parser.Byte();
-                    switch (type)
-                    {
-                        case 1: // byte
-                            response.Parameters[key] = parser.Byte();
-                            break;
-                        case 2: // short
-                            response.Parameters[key] = parser.Short();
-                            break;
-                        case 4: // int
-                            response.Parameters[key] = parser.Int();
-                            break;
-                        case 8: // long
-                            response.Parameters[key] = parser.Long();
-                            break;
-                        case 99: // string
-                            response.Parameters[key] = parser.String();
-                            break;
-                    }
+                    response.Parameters[key] = parser.Object();
                 }
                 Listener.OnOperationResponse(response);
             }
@@ -172,25 +138,7 @@ namespace itfantasy.nodepeer
                 while (!parser.OverFlow())
                 {
                     byte key = parser.Byte();
-                    byte type = parser.Byte();
-                    switch (type)
-                    {
-                        case 1: // byte
-                            eventData.Parameters[key] = parser.Byte();
-                            break;
-                        case 2: // short
-                            eventData.Parameters[key] = parser.Short();
-                            break;
-                        case 4: // int
-                            eventData.Parameters[key] = parser.Int();
-                            break;
-                        case 8: // long
-                            eventData.Parameters[key] = parser.Long();
-                            break;
-                        case 99: // string
-                            eventData.Parameters[key] = parser.String();
-                            break;
-                    }
+                    eventData.Parameters[key] = parser.Object();
                 }
                 Listener.OnEvent(eventData);
             }

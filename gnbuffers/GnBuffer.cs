@@ -50,6 +50,36 @@ namespace itfantasy.nodepeer.gnbuffers
             this.offset += buffer.Length;
         }
 
+        public void PushObject(object value)
+        {
+            Type type = value.GetType();
+            if(type == typeof(byte))
+            {
+                this.PushByte((byte)'b');
+                this.PushByte((byte)value);
+            }
+            else if(type == typeof(short))
+            {
+                this.PushByte((byte)'t');
+                this.PushShort((short)value);
+            }
+            else if(type == typeof(int))
+            {
+                this.PushByte((byte)'i');
+                this.PushInt((int)value);
+            }
+            else if (type == typeof(long))
+            {
+                this.PushByte((byte)'l');
+                this.PushLong((long)value);
+            }
+            else if (type == typeof(string))
+            {
+                this.PushByte((byte)'s');
+                this.PushString(value.ToString());
+            }
+        }
+
         public byte[] Bytes()
         {
             byte[] buf = new byte[this.offset];
