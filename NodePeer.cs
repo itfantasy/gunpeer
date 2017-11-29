@@ -14,10 +14,14 @@ namespace itfantasy.nodepeer
         INetWorker netWorker;
         ConnectionProtocol protocolType;
 
+        StatusCode curStatus;
+        StatusCode lstStatus;
+
         public NodePeer(ConnectionProtocol protocolType)
             : base(protocolType)
         {
             this.protocolType = protocolType;
+            this.protocolType = ConnectionProtocol.WebSocket;
         }
 
         public NodePeer(IPhotonPeerListener listener, ConnectionProtocol protocolType)
@@ -28,6 +32,10 @@ namespace itfantasy.nodepeer
 
         public override bool Connect(string serverAddress, string applicationName, object custom)
         {
+            if (applicationName == "")
+            {
+                applicationName = "lobby";
+            }
             var proto = this.protocolToString(this.protocolType);
             var err = this.InitNetWorker(proto, serverAddress);
             if (err != errors.nil)
@@ -65,12 +73,17 @@ namespace itfantasy.nodepeer
 
         public override void Service()
         {
+            if (curStatus != lstStatus)
+            {
+                this.Listener.OnStatusChanged(curStatus);
+                lstStatus = curStatus;
+            }
             this.netWorker.Update();
         }
 
         public override bool SendOutgoingCommands()
         {
-            this.netWorker.Update();
+            Service();
             return false;
         }
 
@@ -117,7 +130,8 @@ namespace itfantasy.nodepeer
 
         public void OnConn()
         {
-            this.Listener.OnStatusChanged(StatusCode.Connect);
+            //this.Listener.OnStatusChanged(StatusCode.Connect);
+            curStatus = StatusCode.Connect;
         }
 
         public void OnMsg(byte[] msg)
@@ -156,7 +170,8 @@ namespace itfantasy.nodepeer
 
         public void OnClose()
         {
-            Listener.OnStatusChanged(StatusCode.Disconnect);
+            //Listener.OnStatusChanged(StatusCode.Disconnect);
+            curStatus = StatusCode.Disconnect;
         }
 
         public void OnError(error err)

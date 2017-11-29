@@ -40,12 +40,12 @@ namespace itfantasy.nodepeer.nets.ws
             this.websocket.OnMessage += websocket_OnMessage;
             this.websocket.OnClose += websocket_OnClose;
             this.websocket.OnError += websocket_OnError;
-            this.websocket.Connect();
+            this.websocket.ConnectAsync();
         }
 
         public error Send(byte[] msg)
         {
-            if(msg.Length > 1015)
+            if (msg.Length > 1015)
             {
                 return errors.New("the max length of send buffer is 1015 !");
             }
@@ -65,7 +65,7 @@ namespace itfantasy.nodepeer.nets.ws
 
         public error BindEventListener(INetEventListener eventListener)
         {
-            if(this.eventListener == null)
+            if (this.eventListener == null)
             {
                 this.eventListener = eventListener;
                 return errors.nil;
