@@ -68,6 +68,12 @@ namespace itfantasy.nodepeer
             this.netWorker.Update();
         }
 
+        public override bool SendOutgoingCommands()
+        {
+            this.netWorker.Update();
+            return false;
+        }
+
         public override bool OpCustom(byte customOpCode, Dictionary<byte, object> customOpParameters, bool sendReliable)
         {
             return this.OpCustom(customOpCode, customOpParameters, sendReliable, 0);
@@ -121,6 +127,8 @@ namespace itfantasy.nodepeer
             if (sign == 0) // response
             {
                 OperationResponse response = new OperationResponse();
+                response.Parameters = new Dictionary<byte, object>();
+
                 response.OperationCode = parser.Byte();
                 response.ReturnCode = parser.Short();
 
@@ -134,6 +142,8 @@ namespace itfantasy.nodepeer
             else if (sign == 1) // event
             {
                 EventData eventData = new EventData();
+                eventData.Parameters = new Dictionary<byte, object>();
+
                 eventData.Code = parser.Byte();
                 while (!parser.OverFlow())
                 {
