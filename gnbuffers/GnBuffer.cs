@@ -50,6 +50,25 @@ namespace itfantasy.nodepeer.gnbuffers
             this.offset += buffer.Length;
         }
 
+        public void PushHash(Dictionary<object, object> value)
+        {
+            this.PushInt(value.Count);
+            foreach(KeyValuePair<object, object> kv in value)
+            {
+                this.PushObject(kv.Key);
+                this.PushObject(kv.Value);
+            }
+        }
+
+        public void PushIntArray(int[] value)
+        {
+            this.PushInt(value.Length);
+            foreach(int item in value)
+            {
+                this.PushInt(item);
+            }
+        }
+
         public void PushObject(object value)
         {
             Type type = value.GetType();
@@ -77,6 +96,16 @@ namespace itfantasy.nodepeer.gnbuffers
             {
                 this.PushByte((byte)'s');
                 this.PushString(value.ToString());
+            }
+            else if (type == typeof(Dictionary<object, object>))
+            {
+                this.PushByte((byte)'H');
+                this.PushHash(value as Dictionary<object, object>);
+            }
+            else if (type == typeof(int[]))
+            {
+                this.PushByte((byte)'I');
+                this.PushIntArray(value as int[]);
             }
         }
 

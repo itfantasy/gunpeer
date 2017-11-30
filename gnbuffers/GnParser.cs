@@ -50,6 +50,30 @@ namespace itfantasy.nodepeer.gnbuffers
             return ret;
         }
 
+        public Dictionary<object, object> Hash()
+        {
+            int length = this.Int();
+            Dictionary<object, object> hash = new Dictionary<object, object>();
+            for (int i = 0; i < length; i++)
+            {
+                object k = this.Object();
+                object v = this.Object();
+                hash[k] = v;
+            }
+            return hash;
+        }
+
+        public int[] IntArray()
+        {
+            int length = this.Int();
+            int[] array = new int[length];
+            for (int i = 0; i < length; i++)
+            {
+                array[i] = length;
+            }
+            return array;
+        }
+
         public object Object()
         {
             char c = (char)this.Byte();
@@ -65,6 +89,10 @@ namespace itfantasy.nodepeer.gnbuffers
                     return this.Long();
                 case 's':
                     return this.String();
+                case 'H':
+                    return this.Hash();
+                case 'I':
+                    return this.IntArray();
             }
             return null;
         }
