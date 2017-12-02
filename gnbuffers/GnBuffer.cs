@@ -50,39 +50,63 @@ namespace itfantasy.nodepeer.gnbuffers
             this.offset += buffer.Length;
         }
 
+        public void PushFloat(float value)
+        {
+            byte[] buffer = BitConverter.GetBytes(value);
+            Buffer.BlockCopy(buffer, 0, this.buffer, this.offset, buffer.Length);
+            this.offset += buffer.Length;
+        }
+
+        public void PushInts(int[] value)
+        {
+            this.PushInt(value.Length);
+            foreach (int item in value)
+            {
+                this.PushInt(item);
+            }
+        }
+
+        public void PushArray(Array value)
+        {
+            this.PushInt(value.Length);
+            foreach(object item in value)
+            {
+                this.PushObject(value);
+            }
+        }
+
         public void PushHash(Dictionary<object, object> value)
         {
             this.PushInt(value.Count);
-            foreach(KeyValuePair<object, object> kv in value)
+            foreach (KeyValuePair<object, object> kv in value)
             {
                 this.PushObject(kv.Key);
                 this.PushObject(kv.Value);
             }
         }
 
-        public void PushIntArray(int[] value)
+        public void PushNative(object value)
         {
-            this.PushInt(value.Length);
-            foreach(int item in value)
-            {
-                this.PushInt(item);
-            }
+            byte[] datas = NativeFormatter.SerializeToBinary(value);
+            this.PushInt(datas.Length);
+            Buffer.BlockCopy(buffer, 0, this.buffer, this.offset, datas.Length);
+            this.offset += datas.Length;
         }
 
         public void PushObject(object value)
         {
             Type type = value.GetType();
-            if(type == typeof(byte))
+            if (type == typeof(byte))
             {
                 this.PushByte((byte)'b');
                 this.PushByte((byte)value);
             }
-            else if(type == typeof(short))
+            else if (type == typeof(short))
             {
                 this.PushByte((byte)'t');
                 this.PushShort((short)value);
             }
-            else if(type == typeof(int))
+            else if (type == typeof(int))
             {
                 this.PushByte((byte)'i');
                 this.PushInt((int)value);
@@ -97,15 +121,33 @@ namespace itfantasy.nodepeer.gnbuffers
                 this.PushByte((byte)'s');
                 this.PushString(value.ToString());
             }
-            else if (type == typeof(Dictionary<object, object>))
+            else if (type == typeof(float))
+            {
+                this.PushByte((byte)'f');
+                this.PushFloat((float)value);
+            }
+            else if (value is Array)
+            {
+                if (type == typeof(int[]))
+                {
+                    this.PushByte((byte)'I');
+                    this.PushInts(value as int[]);
+                }
+                else
+                {
+                    this.PushByte((byte)'A');
+                    this.PushArray(value as Array);
+                }
+            }
+            else if (value is Dictionary<object, object>)
             {
                 this.PushByte((byte)'H');
                 this.PushHash(value as Dictionary<object, object>);
             }
-            else if (type == typeof(int[]))
+            else
             {
-                this.PushByte((byte)'I');
-                this.PushIntArray(value as int[]);
+                this.PushByte((byte)'#');
+                this.PushNative(value);
             }
         }
 
@@ -115,5 +157,6 @@ namespace itfantasy.nodepeer.gnbuffers
             Buffer.BlockCopy(this.buffer, 0, buf, 0, offset);
             return buf;
         }
+
     }
 }

@@ -143,13 +143,21 @@ namespace itfantasy.nodepeer
                 OperationResponse response = new OperationResponse();
                 response.Parameters = new Dictionary<byte, object>();
 
-                response.OperationCode = parser.Byte();
                 response.ReturnCode = parser.Short();
+                response.OperationCode = parser.Byte();
 
                 while (!parser.OverFlow())
                 {
                     byte key = parser.Byte();
-                    response.Parameters[key] = parser.Object();
+                    object value = parser.Object();
+                    if (value.GetType() == typeof(Dictionary<object, object>))
+                    {
+                        response.Parameters[key] = DictToHashtable(value as Dictionary<object, object>);
+                    }
+                    else
+                    {
+                        response.Parameters[key] = value;
+                    }
                 }
                 Listener.OnOperationResponse(response);
             }
@@ -162,7 +170,18 @@ namespace itfantasy.nodepeer
                 while (!parser.OverFlow())
                 {
                     byte key = parser.Byte();
-                    eventData.Parameters[key] = parser.Object();
+                    object value = parser.Object();
+                    if (value != null)
+                    {
+                        if (value.GetType() == typeof(Dictionary<object, object>))
+                        {
+                            eventData.Parameters[key] = DictToHashtable(value as Dictionary<object, object>);
+                        }
+                        else
+                        {
+                            eventData.Parameters[key] = value;
+                        }
+                    }
                 }
                 Listener.OnEvent(eventData);
             }
@@ -192,5 +211,16 @@ namespace itfantasy.nodepeer
             }
             return "";
         }
+
+        private Hashtable DictToHashtable(Dictionary<object, object> dict)
+        {
+            Hashtable hash = new Hashtable();
+            foreach (KeyValuePair<object, object> kv in dict)
+            {
+                hash[kv.Key] = kv.Value;
+            }
+            return hash;
+        }
+
     }
 }

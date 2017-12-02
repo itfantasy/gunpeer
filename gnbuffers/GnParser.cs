@@ -50,6 +50,35 @@ namespace itfantasy.nodepeer.gnbuffers
             return ret;
         }
 
+        public float Float()
+        {
+            float ret = BitConverter.ToSingle(this.buffer, this.offset);
+            this.offset += 4;
+            return ret;
+        }
+
+        public int[] Ints()
+        {
+            int length = this.Int();
+            int[] array = new int[length];
+            for (int i = 0; i < length; i++)
+            {
+                array[i] = this.Int();
+            }
+            return array;
+        }
+
+        public object[] Array()
+        {
+            int length = this.Int();
+            object[] array = new object[length];
+            for (int i = 0; i < length; i++)
+            {
+                array[i] = this.Object();
+            }
+            return array;
+        }
+
         public Dictionary<object, object> Hash()
         {
             int length = this.Int();
@@ -63,15 +92,13 @@ namespace itfantasy.nodepeer.gnbuffers
             return hash;
         }
 
-        public int[] IntArray()
+        public object Native()
         {
             int length = this.Int();
-            int[] array = new int[length];
-            for (int i = 0; i < length; i++)
-            {
-                array[i] = length;
-            }
-            return array;
+            byte[] datas = new byte[length];
+            Buffer.BlockCopy(this.buffer, this.offset, datas, 0, length);
+            this.offset += length;
+            return NativeFormatter.DeserializeWithBinary(datas);
         }
 
         public object Object()
@@ -89,10 +116,16 @@ namespace itfantasy.nodepeer.gnbuffers
                     return this.Long();
                 case 's':
                     return this.String();
+                case 'f':
+                    return this.Float();
+                case 'I':
+                    return this.Ints();
+                case 'A':
+                    return this.Array();
                 case 'H':
                     return this.Hash();
-                case 'I':
-                    return this.IntArray();
+                case '#':
+                    return this.Native();
             }
             return null;
         }
