@@ -98,55 +98,55 @@ namespace itfantasy.nodepeer.gnbuffers
             Type type = value.GetType();
             if (type == typeof(byte))
             {
-                this.PushByte((byte)'b');
+                this.PushByte(GnTypes.Byte);
                 this.PushByte((byte)value);
             }
             else if (type == typeof(short))
             {
-                this.PushByte((byte)'t');
+                this.PushByte(GnTypes.Short);
                 this.PushShort((short)value);
             }
             else if (type == typeof(int))
             {
-                this.PushByte((byte)'i');
+                this.PushByte(GnTypes.Int);
                 this.PushInt((int)value);
             }
             else if (type == typeof(long))
             {
-                this.PushByte((byte)'l');
+                this.PushByte(GnTypes.Long);
                 this.PushLong((long)value);
             }
             else if (type == typeof(string))
             {
-                this.PushByte((byte)'s');
+                this.PushByte(GnTypes.String);
                 this.PushString(value.ToString());
             }
             else if (type == typeof(float))
             {
-                this.PushByte((byte)'f');
+                this.PushByte(GnTypes.Float);
                 this.PushFloat((float)value);
             }
             else if (value is Array)
             {
                 if (type == typeof(int[]))
                 {
-                    this.PushByte((byte)'I');
+                    this.PushByte(GnTypes.Ints);
                     this.PushInts(value as int[]);
                 }
                 else
                 {
-                    this.PushByte((byte)'A');
+                    this.PushByte(GnTypes.Array);
                     this.PushArray(value as Array);
                 }
             }
             else if (value is Dictionary<object, object>)
             {
-                this.PushByte((byte)'H');
+                this.PushByte(GnTypes.Hash);
                 this.PushHash(value as Dictionary<object, object>);
             }
             else
             {
-                this.PushByte((byte)'#');
+                this.PushByte(GnTypes.Native);
                 this.PushNative(value);
             }
         }

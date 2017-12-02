@@ -103,28 +103,28 @@ namespace itfantasy.nodepeer.gnbuffers
 
         public object Object()
         {
-            char c = (char)this.Byte();
+            byte c = this.Byte();
             switch (c)
             {
-                case 'b':
+                case GnTypes.Byte:
                     return this.Byte();
-                case 't':
+                case GnTypes.Short:
                     return this.Short();
-                case 'i':
+                case GnTypes.Int:
                     return this.Int();
-                case 'l':
+                case GnTypes.Long:
                     return this.Long();
-                case 's':
+                case GnTypes.String:
                     return this.String();
-                case 'f':
+                case GnTypes.Float:
                     return this.Float();
-                case 'I':
+                case GnTypes.Ints:
                     return this.Ints();
-                case 'A':
+                case GnTypes.Array:
                     return this.Array();
-                case 'H':
+                case GnTypes.Hash:
                     return this.Hash();
-                case '#':
+                case GnTypes.Native:
                     return this.Native();
             }
             return null;

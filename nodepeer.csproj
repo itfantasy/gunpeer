@@ -123,6 +123,7 @@
     <Compile Include="error.cs" />
     <Compile Include="gnbuffers\GnBuffer.cs" />
     <Compile Include="gnbuffers\GnParser.cs" />
+    <Compile Include="gnbuffers\GnTypes.cs" />
     <Compile Include="gnbuffers\NativeFormatter.cs" />
     <Compile Include="nets\INetEventListener.cs" />
     <Compile Include="nets\INetWorker.cs" />
