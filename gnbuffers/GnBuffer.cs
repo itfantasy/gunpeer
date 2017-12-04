@@ -146,8 +146,27 @@ namespace itfantasy.nodepeer.gnbuffers
             }
             else
             {
-                this.PushByte(GnTypes.Native);
-                this.PushNative(value);
+                if (customTypeExtends.ContainsKey(type))
+                {
+                    CustomType custom = customTypeExtends[type];
+                    this.PushByte(custom.bSign);
+                    if (custom.gnSerializeFunc != null)
+                    {
+                        custom.gnSerializeFunc(this, value);
+                    }
+                    else
+                    {
+                        byte[] datas = custom.serializeFunc(value);
+                        this.PushInt(datas.Length);
+                        Buffer.BlockCopy(datas, 0, this.buffer, this.offset, datas.Length);
+                        this.offset += datas.Length;
+                    }
+                }
+                else
+                {
+                    this.PushByte(GnTypes.Native);
+                    this.PushNative(value);
+                }
             }
         }
 
@@ -158,5 +177,18 @@ namespace itfantasy.nodepeer.gnbuffers
             return buf;
         }
 
+        private static Dictionary<Type, CustomType> customTypeExtends = new Dictionary<Type, CustomType>();
+
+        public static bool ExtendCustomType(Type type, byte bSign, SerializeFunc func)
+        {
+            customTypeExtends[type] = new CustomType(type, bSign, func, null);
+            return true;
+        }
+
+        public static bool ExtendCustomType(Type type, byte bSign, GnSerializeFunc func)
+        {
+            customTypeExtends[type] = new CustomType(type, bSign, func, null);
+            return true;
+        }
     }
 }

@@ -126,13 +126,43 @@ namespace itfantasy.nodepeer.gnbuffers
                     return this.Hash();
                 case GnTypes.Native:
                     return this.Native();
+                default:
+                    if (customTypeExtends.ContainsKey(c))
+                    {
+                        CustomType custom = customTypeExtends[c];
+                        if (custom.gnDeserializeFunc != null)
+                        {
+                            return custom.gnDeserializeFunc(this);
+                        }
+                        else
+                        {
+                            int length = this.Int();
+                            object ret = customTypeExtends[c].deserializeFunc(this.buffer);
+                            this.offset += length;
+                            return ret;
+                        }
+                    }    
+                    return null;
             }
-            return null;
         }
 
         public bool OverFlow()
         {
             return this.offset >= this.buffer.Length;   
+        }
+
+        private static Dictionary<byte, CustomType> customTypeExtends = new Dictionary<byte, CustomType>();
+
+        public static bool ExtendCustomType(Type type, byte bSign, DeserializeFunc func)
+        {
+            customTypeExtends[bSign] = new CustomType(type, bSign, null, func);
+            return true;
+        }
+
+        public static bool ExtendCustomType(Type type, byte bSign, GnDeserializeFunc func)
+        {
+            customTypeExtends[bSign] = new CustomType(type, bSign, null, func);
+            return true;
         }
     }
 }

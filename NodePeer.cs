@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 using ExitGames.Client.Photon;
 using itfantasy.nodepeer.nets;
 using itfantasy.nodepeer.nets.ws;
@@ -22,6 +23,7 @@ namespace itfantasy.nodepeer
         {
             this.protocolType = protocolType;
             this.protocolType = ConnectionProtocol.WebSocket;
+            this.ExtendsUnityTypes();
         }
 
         public NodePeer(IPhotonPeerListener listener, ConnectionProtocol protocolType)
@@ -222,5 +224,50 @@ namespace itfantasy.nodepeer
             return hash;
         }
 
+        private void ExtendsUnityTypes()
+        {
+            GnTypes.GnExtendCustomType(typeof(Vector2), (byte)'W', (buf, obj) =>
+            {
+                Vector2 val = (Vector2)obj;
+                buf.PushFloat(val.x);
+                buf.PushFloat(val.y);
+            }, (parser) =>
+            {
+                Vector2 val = new Vector2();
+                val.x = parser.Float();
+                val.y = parser.Float();
+                return val;
+            });
+
+            GnTypes.GnExtendCustomType(typeof(Vector3), (byte)'V', (buf, obj) => {
+                Vector3 val = (Vector3)obj;
+                buf.PushFloat(val.x);
+                buf.PushFloat(val.y);
+                buf.PushFloat(val.z);
+            }, (parser) => {
+                Vector3 val = new Vector3();
+                val.x = parser.Float();
+                val.y = parser.Float();
+                val.z = parser.Float();
+                return val;
+            });
+
+            GnTypes.GnExtendCustomType(typeof(Quaternion), (byte)'Q', (buf, obj) =>
+            {
+                Quaternion val = (Quaternion)obj;
+                buf.PushFloat(val.w);
+                buf.PushFloat(val.x);
+                buf.PushFloat(val.y);
+                buf.PushFloat(val.z);
+            }, (parser) =>
+            {
+                Quaternion val = new Quaternion();
+                val.w = parser.Float();
+                val.x = parser.Float();
+                val.y = parser.Float();
+                val.z = parser.Float();
+                return val;
+            });
+        }
     }
 }
