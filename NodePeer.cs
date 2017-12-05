@@ -173,16 +173,13 @@ namespace itfantasy.nodepeer
                 {
                     byte key = parser.Byte();
                     object value = parser.Object();
-                    if (value != null)
+                    if (value.GetType() == typeof(Dictionary<object, object>))
                     {
-                        if (value.GetType() == typeof(Dictionary<object, object>))
-                        {
-                            eventData.Parameters[key] = DictToHashtable(value as Dictionary<object, object>);
-                        }
-                        else
-                        {
-                            eventData.Parameters[key] = value;
-                        }
+                        eventData[key] = DictToHashtable(value as Dictionary<object, object>);
+                    }
+                    else
+                    {
+                        eventData[key] = value;
                     }
                 }
                 Listener.OnEvent(eventData);
@@ -239,12 +236,14 @@ namespace itfantasy.nodepeer
                 return val;
             });
 
-            GnTypes.GnExtendCustomType(typeof(Vector3), (byte)'V', (buf, obj) => {
+            GnTypes.GnExtendCustomType(typeof(Vector3), (byte)'V', (buf, obj) =>
+            {
                 Vector3 val = (Vector3)obj;
                 buf.PushFloat(val.x);
                 buf.PushFloat(val.y);
                 buf.PushFloat(val.z);
-            }, (parser) => {
+            }, (parser) =>
+            {
                 Vector3 val = new Vector3();
                 val.x = parser.Float();
                 val.y = parser.Float();
