@@ -6,6 +6,7 @@ using UnityEngine;
 using ExitGames.Client.Photon;
 using itfantasy.nodepeer.nets;
 using itfantasy.nodepeer.nets.ws;
+using itfantasy.nodepeer.nets.kcp;
 using itfantasy.nodepeer.gnbuffers;
 
 namespace itfantasy.nodepeer
@@ -122,6 +123,12 @@ namespace itfantasy.nodepeer
                     this.netWorker.BindEventListener(this);
                     return errors.nil;
                 }
+                else if(proto == "kcp")
+                {
+                    this.netWorker = new KcpNetWorker();
+                    this.netWorker.BindEventListener(this);
+                    return errors.nil;
+                }
             }
             catch (Exception e)
             {
@@ -202,7 +209,7 @@ namespace itfantasy.nodepeer
             switch (protocol)
             {
                 case ConnectionProtocol.Udp:
-                    return "udp";
+                    return "kcp";
                 case ConnectionProtocol.Tcp:
                     return "tcp";
                 case ConnectionProtocol.WebSocket:

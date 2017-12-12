@@ -46,6 +46,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="3rdParty\Kcp-Sharp\common\kcp.cs" />
+    <Compile Include="3rdParty\Kcp-Sharp\common\switch_queue.cs" />
+    <Compile Include="3rdParty\Kcp-Sharp\v1\udp_socket_v1.cs" />
+    <Compile Include="3rdParty\Kcp-Sharp\v2\udp_socket_v2.cs" />
     <Compile Include="3rdParty\WebSocketSharp\ByteOrder.cs" />
     <Compile Include="3rdParty\WebSocketSharp\CloseEventArgs.cs" />
     <Compile Include="3rdParty\WebSocketSharp\CloseStatusCode.cs" />
@@ -131,6 +135,7 @@
     <Compile Include="gnbuffers\NativeFormatter.cs" />
     <Compile Include="nets\INetEventListener.cs" />
     <Compile Include="nets\INetWorker.cs" />
+    <Compile Include="nets\kcp\KcpNetWorker.cs" />
     <Compile Include="nets\ws\WSNetWorker.cs" />
     <Compile Include="NodePeer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
