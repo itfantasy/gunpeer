@@ -136,6 +136,7 @@
     <Compile Include="nets\INetEventListener.cs" />
     <Compile Include="nets\INetWorker.cs" />
     <Compile Include="nets\kcp\KcpNetWorker.cs" />
+    <Compile Include="nets\tcp\TcpNetWorker.cs" />
     <Compile Include="nets\ws\WSNetWorker.cs" />
     <Compile Include="NodePeer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -143,6 +144,9 @@
   <ItemGroup>
     <Content Include="3rdParty\photon\Photon3Unity3D.dll" />
     <Content Include="3rdParty\unity\UnityEngine.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="nets\http\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

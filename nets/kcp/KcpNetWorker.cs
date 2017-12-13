@@ -121,6 +121,7 @@ namespace itfantasy.nodepeer.nets.kcp
         {
             this.kcpsocket.Close();
             this.kcpsocket = null;
+            this.msgQueue.Clear();
         }
 
     }
