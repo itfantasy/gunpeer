@@ -148,6 +148,15 @@
   <ItemGroup>
     <Folder Include="nets\http\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\lmjson\lmjson.csproj">
+      <Project>{a00132b8-bbf9-4976-9f3b-1b411ed044d8}</Project>
+      <Name>lmjson</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="3rdParty\lmjson\lmjson.md" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

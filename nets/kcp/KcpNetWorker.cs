@@ -14,6 +14,8 @@ using Kcp = KcpProject.v1;
 using Kcp = KcpProject.v2;
 #endif
 
+using itfantasy.lmjson;
+
 namespace itfantasy.nodepeer.nets.kcp
 {
     public class KcpNetWorker : INetWorker
@@ -77,6 +79,7 @@ namespace itfantasy.nodepeer.nets.kcp
             });
 #endif
             this.kcpsocket.Connect(infos[0], ushort.Parse(infos[1]));
+            this.doHandShake("localhost");
 #if KCP_v1
 #else // KCP_v2
             this.eventListener.OnConn();
@@ -124,6 +127,14 @@ namespace itfantasy.nodepeer.nets.kcp
             this.msgQueue.Clear();
         }
 
+        private void doHandShake(string origin)
+        {
+            JsonData jd = new JsonData();
+            jd["Origin"] = origin;
+            string json = JSON.Stringify(jd);
+            byte[] buf = System.Text.Encoding.UTF8.GetBytes(json);
+            Send(buf);
+        }
     }
 
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using itfantasy.nodepeer.nets;
+using itfantasy.lmjson;
 
 namespace itfantasy.nodepeer.nets.tcp
 {
@@ -25,6 +26,7 @@ namespace itfantasy.nodepeer.nets.tcp
             tcpsocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             tcpsocket.BeginConnect(infos[0], int.Parse(infos[1]), (ar) => {
                 this.tcpsocket.EndConnect(ar);
+                this.doHandShake("localhost");
                 this.eventListener.OnConn();
                 this.rcvbuf = new byte[4096];
                 this.tcpsocket.BeginReceive(rcvbuf, 0, rcvbuf.Length, 0, (ar2) => {
@@ -92,5 +94,13 @@ namespace itfantasy.nodepeer.nets.tcp
             this.msgQueue.Clear();
         }
 
+        private void doHandShake(string origin)
+        {
+            JsonData jd = new JsonData();
+            jd["Origin"] = origin;
+            string json = JSON.Stringify(jd);
+            byte[] buf = System.Text.Encoding.UTF8.GetBytes(json);
+            Send(buf);
+        }
     }
 }
