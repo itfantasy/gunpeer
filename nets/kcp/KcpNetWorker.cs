@@ -73,9 +73,10 @@ namespace itfantasy.nodepeer.nets.kcp
                 }
             });
 #else // KCP_v2
-            this.kcpsocket = new KcpProject.v2.UdpSocket((byte[] buf) => 
-            {
+            this.kcpsocket = new KcpProject.v2.UdpSocket((byte[] buf) =>  {
                 this.eventListener.OnMsg(buf);
+            },(err) => {
+                this.eventListener.OnError(errors.New(err));
             });
 #endif
             this.kcpsocket.Connect(infos[0], ushort.Parse(infos[1]));

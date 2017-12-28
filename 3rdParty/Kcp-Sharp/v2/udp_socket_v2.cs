@@ -21,6 +21,10 @@ namespace KcpProject.v2
         private IPEndPoint mIPEndPoint;
         private IPEndPoint mSvrEndPoint;
         private Action<byte[]> evHandler;
+        /// <summary>
+        /// the err callback ( itfantasy added )
+        /// </summary>
+        private Action<string> errHandler;
         private KCP mKcp;
         private bool mNeedUpdateFlag;
         private UInt32 mNextUpdateTime;
@@ -30,6 +34,17 @@ namespace KcpProject.v2
         public UdpSocket(Action<byte[]> handler)
         {
             evHandler = handler;
+        }
+
+        /// <summary>
+        /// another constructor with errHandler ( itfantasy added )
+        /// </summary>
+        /// <param name="handler"></param>
+        /// <param name="errHandler"></param>
+        public UdpSocket(Action<byte[]> handler, Action<string> errHandler)
+        {
+            evHandler = handler;
+            this.errHandler = errHandler;
         }
 
         public void Connect(string host, UInt16 port)
@@ -57,20 +72,31 @@ namespace KcpProject.v2
 
         void ReceiveCallback(IAsyncResult ar)
         {
-            Byte[] data = (mIPEndPoint == null) ?
-                mUdpClient.Receive(ref mIPEndPoint) :
-                mUdpClient.EndReceive(ar, ref mIPEndPoint);
-
-            if (null != data)
+            try
             {
-                // push udp packet to switch queue.
-                mRecvQueue.Push(data);
+                Byte[] data = (mIPEndPoint == null) ?
+                    mUdpClient.Receive(ref mIPEndPoint) :
+                    mUdpClient.EndReceive(ar, ref mIPEndPoint);
+
+                if (null != data)
+                {
+                    // push udp packet to switch queue.
+                    mRecvQueue.Push(data);
+                }
+
+                if (mUdpClient != null)
+                {
+                    // try to receive again.
+                    mUdpClient.BeginReceive(ReceiveCallback, this);
+                }
             }
-
-            if (mUdpClient != null)
+            catch(Exception e)
             {
-                // try to receive again.
-                mUdpClient.BeginReceive(ReceiveCallback, this);
+                // itfantasy added
+                if (this.errHandler != null)
+                {
+                    this.errHandler.Invoke(e.Message);
+                }
             }
         } 
 
