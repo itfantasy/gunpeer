@@ -156,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="3rdParty\lmjson\lmjson.md" />
+    <None Include="3rdParty\photon\PUN.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
