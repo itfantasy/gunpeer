@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using ExitGames.Client.Photon;
-using itfantasy.nodepeer.nets;
-using itfantasy.nodepeer.nets.ws;
-using itfantasy.nodepeer.nets.kcp;
-using itfantasy.nodepeer.gnbuffers;
+using itfantasy.gun;
+using itfantasy.gun.nets;
+using itfantasy.gun.nets.ws;
+using itfantasy.gun.nets.kcp;
+using itfantasy.gun.gnbuffers;
 
 namespace itfantasy.nodepeer
 {
