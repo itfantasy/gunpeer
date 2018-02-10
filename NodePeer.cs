@@ -24,7 +24,6 @@ namespace itfantasy.nodepeer
             : base(protocolType)
         {
             this.protocolType = protocolType;
-            this.protocolType = ConnectionProtocol.WebSocket;
             this.ExtendsUnityTypes();
         }
 
@@ -77,12 +76,21 @@ namespace itfantasy.nodepeer
 
         public override void Service()
         {
+            this.netWorker.Update();
             if (curStatus != lstStatus)
             {
+                bool setted = false;
+                if (curStatus == StatusCode.Disconnect)
+                {
+                    lstStatus = curStatus;
+                    setted = true;
+                }
                 this.Listener.OnStatusChanged(curStatus);
-                lstStatus = curStatus;
+                if (!setted)
+                {
+                    lstStatus = curStatus;
+                }
             }
-            this.netWorker.Update();
         }
 
         public override bool SendOutgoingCommands()
@@ -124,7 +132,7 @@ namespace itfantasy.nodepeer
                     this.netWorker.BindEventListener(this);
                     return errors.nil;
                 }
-                else if(proto == "kcp")
+                else if (proto == "kcp")
                 {
                     this.netWorker = new KcpNetWorker();
                     this.netWorker.BindEventListener(this);
