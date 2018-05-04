@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define GUN_SDK
+#define FULL_LOG
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,14 +8,20 @@ using UnityEngine;
 using ExitGames.Client.Photon;
 using itfantasy.gun;
 using itfantasy.gun.nets;
+#if UNITY_EDITOR
 using itfantasy.gun.nets.ws;
+#endif
 using itfantasy.gun.nets.kcp;
 using itfantasy.gun.gnbuffers;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace itfantasy.nodepeer
 {
     public class NodePeer : PhotonPeer, INetEventListener
     {
+        
         INetWorker netWorker;
         ConnectionProtocol protocolType;
 
@@ -23,18 +31,23 @@ namespace itfantasy.nodepeer
         public NodePeer(ConnectionProtocol protocolType)
             : base(protocolType)
         {
+#if GUN_SDK
             this.protocolType = protocolType;
             this.ExtendsUnityTypes();
+#endif
         }
 
         public NodePeer(IPhotonPeerListener listener, ConnectionProtocol protocolType)
             : base(listener, protocolType)
         {
+#if GUN_SDK
             this.protocolType = protocolType;
+#endif
         }
 
         public override bool Connect(string serverAddress, string applicationName, object custom)
         {
+#if GUN_SDK
             if (applicationName == "")
             {
                 applicationName = "lobby";
@@ -48,10 +61,14 @@ namespace itfantasy.nodepeer
             }
             this.netWorker.Connect(proto + "://" + serverAddress, applicationName);
             return true;
+#else
+            return base.Connect(serverAddress, applicationName, custom);
+#endif
         }
 
         public override bool Connect(string serverAddress, string applicationName)
         {
+#if GUN_SDK
             var proto = this.protocolToString(this.protocolType);
             var err = this.InitNetWorker(proto, serverAddress);
             if (err != errors.nil)
@@ -61,22 +78,42 @@ namespace itfantasy.nodepeer
             }
             this.netWorker.Connect(proto + "://" + serverAddress, applicationName);
             return true;
+#else
+            return base.Connect(serverAddress, applicationName);
+#endif
         }
 
         public override void Disconnect()
         {
+#if GUN_SDK
             this.netWorker.Close();
+#else
+            base.Disconnect();
+#endif
         }
 
         public bool EstablishEncryption()
         {
+#if GUN_SDK
             this.Listener.OnStatusChanged(StatusCode.EncryptionEstablished);
             return true;
+#else
+            return base.EstablishEncryption();
+#endif
         }
 
         public override void Service()
         {
-            this.netWorker.Update();
+#if GUN_SDK
+            this.service();
+#else
+            base.Service();
+#endif
+        }
+
+        private bool service()
+        {
+            bool ret = this.netWorker.Update();
             if (curStatus != lstStatus)
             {
                 bool setted = false;
@@ -91,35 +128,66 @@ namespace itfantasy.nodepeer
                     lstStatus = curStatus;
                 }
             }
+            return ret;
         }
 
         public override bool SendOutgoingCommands()
         {
-            Service();
-            return false;
+#if GUN_SDK
+            return this.service();
+#else
+            return base.SendOutgoingCommands();
+#endif
+        }
+
+        public override bool DispatchIncomingCommands()
+        {
+#if GUN_SDK
+            return this.service();
+#else
+            return base.DispatchIncomingCommands();
+#endif
         }
 
         public override bool OpCustom(byte customOpCode, Dictionary<byte, object> customOpParameters, bool sendReliable)
         {
+            LogCustomOp(customOpCode, customOpParameters);
+#if GUN_SDK
             return this.OpCustom(customOpCode, customOpParameters, sendReliable, 0);
+#else
+            return base.OpCustom(customOpCode, customOpParameters, sendReliable);
+#endif
         }
 
         public override bool OpCustom(byte customOpCode, Dictionary<byte, object> customOpParameters, bool sendReliable, byte channelId)
         {
+            LogCustomOp(customOpCode, customOpParameters);
+#if GUN_SDK
             return this.OpCustom(customOpCode, customOpParameters, sendReliable, channelId, false);
+#else
+            return base.OpCustom(customOpCode, customOpParameters, sendReliable, channelId);
+#endif
         }
 
         public override bool OpCustom(byte customOpCode, Dictionary<byte, object> customOpParameters, bool sendReliable, byte channelId, bool encrypt)
         {
+            LogCustomOp(customOpCode, customOpParameters);
+#if GUN_SDK
             var buffer = new GnBuffer(1024);
             buffer.PushByte(customOpCode);
-            foreach (KeyValuePair<byte, object> kv in customOpParameters)
+            if (customOpParameters != null)
             {
-                buffer.PushByte(kv.Key);
-                buffer.PushObject(kv.Value);
+                foreach (KeyValuePair<byte, object> kv in customOpParameters)
+                {
+                    buffer.PushByte(kv.Key);
+                    buffer.PushObject(kv.Value);
+                }
             }
             this.netWorker.SendAsync(buffer.Bytes());
             return true;
+#else
+            return base.OpCustom(customOpCode, customOpParameters, sendReliable, channelId, encrypt);
+#endif
         }
 
         private error InitNetWorker(string proto, string serverAddress)
@@ -128,9 +196,13 @@ namespace itfantasy.nodepeer
             {
                 if (proto == "ws")
                 {
+#if UNITY_EDITOR
                     this.netWorker = new WSNetWorker();
                     this.netWorker.BindEventListener(this);
                     return errors.nil;
+#else
+                    return errors.New("不支持的协议...");
+#endif
                 }
                 else if (proto == "kcp")
                 {
@@ -166,15 +238,22 @@ namespace itfantasy.nodepeer
 
                 while (!parser.OverFlow())
                 {
-                    byte key = parser.Byte();
-                    object value = parser.Object();
-                    if (value.GetType() == typeof(Dictionary<object, object>))
+                    try
                     {
-                        response.Parameters[key] = DictToHashtable(value as Dictionary<object, object>);
+                        byte key = parser.Byte();
+                        object value = parser.Object();
+                        if (value.GetType() == typeof(Dictionary<object, object>))
+                        {
+                            response.Parameters[key] = DictToHashtable(value as Dictionary<object, object>);
+                        }
+                        else
+                        {
+                            response.Parameters[key] = value;
+                        }
                     }
-                    else
+                    catch
                     {
-                        response.Parameters[key] = value;
+                        int jj = 0;
                     }
                 }
                 Listener.OnOperationResponse(response);
@@ -187,15 +266,22 @@ namespace itfantasy.nodepeer
                 eventData.Code = parser.Byte();
                 while (!parser.OverFlow())
                 {
-                    byte key = parser.Byte();
-                    object value = parser.Object();
-                    if (value.GetType() == typeof(Dictionary<object, object>))
+                    try
                     {
-                        eventData[key] = DictToHashtable(value as Dictionary<object, object>);
+                        byte key = parser.Byte();
+                        object value = parser.Object();
+                        if (value.GetType() == typeof(Dictionary<object, object>))
+                        {
+                            eventData[key] = DictToHashtable(value as Dictionary<object, object>);
+                        }
+                        else
+                        {
+                            eventData[key] = value;
+                        }
                     }
-                    else
+                    catch
                     {
-                        eventData[key] = value;
+                        int jj = 0;
                     }
                 }
                 Listener.OnEvent(eventData);
@@ -283,6 +369,64 @@ namespace itfantasy.nodepeer
                 val.z = parser.Float();
                 return val;
             });
+        }
+
+        public static void LogCustomOp(byte customOpCode, Dictionary<byte, object> customOpParameters)
+        {
+#if FULL_LOG
+            Debug.Log("==============> Sending a message...");
+#endif
+            Debug.Log("customOpCode:" +  customOpCode.ToString());
+#if FULL_LOG
+            Debug.Log("customOpParameters:");
+            try
+            {
+                Debug.Log(JsonConvert.SerializeObject(customOpParameters));
+            }
+            catch
+            {
+                Debug.Log("some values...");
+            }
+#endif
+        }
+
+        public static void LogOperationResponse(OperationResponse operationResponse)
+        {
+#if FULL_LOG
+            Debug.Log("==============> Receiving a Response...");
+#endif
+            Debug.Log("OperationCode:" + operationResponse.OperationCode.ToString());
+            Debug.Log("ReturnCode:" + operationResponse.ReturnCode.ToString());
+#if FULL_LOG
+            Debug.Log("operationResponseParameters:");
+            try
+            {
+                Debug.Log(JsonConvert.SerializeObject(operationResponse.Parameters));
+            }
+            catch
+            {
+                Debug.Log("some values...");
+            }
+#endif
+        }
+
+        public static void LogEventData(EventData eventData)
+        {
+#if FULL_LOG
+            Debug.Log("==============> Receiving a Event...");
+#endif
+            Debug.Log("eventDataCode:" + eventData.Code.ToString());
+#if FULL_LOG
+            Debug.Log("eventDataParameters:");
+            try
+            {
+                Debug.Log(JsonConvert.SerializeObject(eventData.Parameters));
+            }
+            catch
+            {
+                Debug.Log("some values...");
+            }
+#endif
         }
     }
 }
