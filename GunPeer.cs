@@ -17,9 +17,9 @@ using itfantasy.gun.gnbuffers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace itfantasy.nodepeer
+namespace itfantasy.gunpeer
 {
-    public class NodePeer : PhotonPeer, INetEventListener
+    public class GunPeer : PhotonPeer, INetEventListener
     {
         
         INetWorker netWorker;
@@ -28,7 +28,7 @@ namespace itfantasy.nodepeer
         StatusCode curStatus;
         StatusCode lstStatus;
 
-        public NodePeer(ConnectionProtocol protocolType)
+        public GunPeer(ConnectionProtocol protocolType)
             : base(protocolType)
         {
 #if GUN_SDK
@@ -37,7 +37,7 @@ namespace itfantasy.nodepeer
 #endif
         }
 
-        public NodePeer(IPhotonPeerListener listener, ConnectionProtocol protocolType)
+        public GunPeer(IPhotonPeerListener listener, ConnectionProtocol protocolType)
             : base(listener, protocolType)
         {
 #if GUN_SDK
@@ -177,10 +177,23 @@ namespace itfantasy.nodepeer
             buffer.PushByte(customOpCode);
             if (customOpParameters != null)
             {
+                object eventData = null;
                 foreach (KeyValuePair<byte, object> kv in customOpParameters)
                 {
-                    buffer.PushByte(kv.Key);
-                    buffer.PushObject(kv.Value);
+                    if (kv.Key == 245)
+                    {
+                        eventData = kv.Value;
+                    }
+                    else
+                    {
+                        buffer.PushByte(kv.Key);
+                        buffer.PushObject(kv.Value);
+                    }
+                }
+                if (eventData != null)
+                {
+                    buffer.PushByte(245);
+                    buffer.PushObject(eventData);
                 }
             }
             this.netWorker.SendAsync(buffer.Bytes());
