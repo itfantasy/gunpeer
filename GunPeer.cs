@@ -251,22 +251,15 @@ namespace itfantasy.gunpeer
 
                 while (!parser.OverFlow())
                 {
-                    try
+                    byte key = parser.Byte();
+                    object value = parser.Object();
+                    if (value.GetType() == typeof(Dictionary<object, object>))
                     {
-                        byte key = parser.Byte();
-                        object value = parser.Object();
-                        if (value.GetType() == typeof(Dictionary<object, object>))
-                        {
-                            response.Parameters[key] = DictToHashtable(value as Dictionary<object, object>);
-                        }
-                        else
-                        {
-                            response.Parameters[key] = value;
-                        }
+                        response.Parameters[key] = DictToHashtable(value as Dictionary<object, object>);
                     }
-                    catch
+                    else
                     {
-                        int jj = 0;
+                        response.Parameters[key] = value;
                     }
                 }
                 Listener.OnOperationResponse(response);
@@ -279,22 +272,15 @@ namespace itfantasy.gunpeer
                 eventData.Code = parser.Byte();
                 while (!parser.OverFlow())
                 {
-                    try
+                    byte key = parser.Byte();
+                    object value = parser.Object();
+                    if (value.GetType() == typeof(Dictionary<object, object>))
                     {
-                        byte key = parser.Byte();
-                        object value = parser.Object();
-                        if (value.GetType() == typeof(Dictionary<object, object>))
-                        {
-                            eventData[key] = DictToHashtable(value as Dictionary<object, object>);
-                        }
-                        else
-                        {
-                            eventData[key] = value;
-                        }
+                        eventData[key] = DictToHashtable(value as Dictionary<object, object>);
                     }
-                    catch
+                    else
                     {
-                        int jj = 0;
+                        eventData[key] = value;
                     }
                 }
                 Listener.OnEvent(eventData);
@@ -382,6 +368,25 @@ namespace itfantasy.gunpeer
                 val.z = parser.Float();
                 return val;
             });
+
+#if UNITY_EDITOR
+            GnTypes.GnExtendCustomType(typeof(PhotonPlayer), (byte)'P', (buf, obj) =>
+            {
+                PhotonPlayer val = (PhotonPlayer)obj;
+                buf.PushInt(val.ID);
+            }, (parser) =>
+            {
+                int ID = parser.Int();
+                if (PhotonNetwork.networkingPeer.mActors.ContainsKey(ID))
+                {
+                    return PhotonNetwork.networkingPeer.mActors[ID];
+                }
+                else
+                {
+                    return null;
+                }
+            });
+#endif
         }
 
         public static void LogCustomOp(byte customOpCode, Dictionary<byte, object> customOpParameters)
