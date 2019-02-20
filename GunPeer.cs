@@ -54,7 +54,7 @@ namespace itfantasy.gunpeer
             }
             var proto = this.protocolToString(this.protocolType);
             var err = this.InitNetWorker(proto, serverAddress);
-            if (err != errors.nil)
+            if (!err.nil)
             {
                 this.OnError(err);
                 return false;
@@ -71,7 +71,7 @@ namespace itfantasy.gunpeer
 #if GUN_SDK
             var proto = this.protocolToString(this.protocolType);
             var err = this.InitNetWorker(proto, serverAddress);
-            if (err != errors.nil)
+            if (!err.nil)
             {
                 this.OnError(err);
                 return false;
