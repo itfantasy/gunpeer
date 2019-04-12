@@ -59,7 +59,7 @@ namespace itfantasy.gunpeer
                 this.OnError(err);
                 return false;
             }
-            this.netWorker.Connect(proto + "://" + serverAddress, applicationName);
+            this.netWorker.Connect(proto + "://" + serverAddress);
             return true;
 #else
             return base.Connect(serverAddress, applicationName, custom);
@@ -76,7 +76,7 @@ namespace itfantasy.gunpeer
                 this.OnError(err);
                 return false;
             }
-            this.netWorker.Connect(proto + "://" + serverAddress, applicationName);
+            this.netWorker.Connect(proto + "://" + serverAddress);
             return true;
 #else
             return base.Connect(serverAddress, applicationName);
