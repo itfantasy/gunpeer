@@ -12,6 +12,7 @@ using itfantasy.gun.nets;
 using itfantasy.gun.nets.ws;
 #endif
 using itfantasy.gun.nets.kcp;
+using itfantasy.gun.nets.tcp;
 using itfantasy.gun.core.binbuf;
 
 using Types = itfantasy.gun.core.binbuf.Types;
@@ -209,7 +210,19 @@ namespace itfantasy.gunpeer
         {
             try
             {
-                if (proto == "ws")
+                if (proto == "kcp")
+                {
+                    this.netWorker = new KcpNetWorker();
+                    this.netWorker.BindEventListener(this);
+                    return errors.nil;
+                }
+                else if (proto == "tcp")
+                {
+                    this.netWorker = new TcpNetWorker();
+                    this.netWorker.BindEventListener(this);
+                    return errors.nil;
+                }
+                else if (proto == "ws")
                 {
 #if UNITY_EDITOR
                     this.netWorker = new WSNetWorker();
@@ -218,12 +231,6 @@ namespace itfantasy.gunpeer
 #else
                     return errors.New("不支持的协议...");
 #endif
-                }
-                else if (proto == "kcp")
-                {
-                    this.netWorker = new KcpNetWorker();
-                    this.netWorker.BindEventListener(this);
-                    return errors.nil;
                 }
             }
             catch (Exception e)
@@ -372,7 +379,7 @@ namespace itfantasy.gunpeer
             });
 
 #if UNITY_EDITOR
-            GnTypes.GnExtendCustomType(typeof(PhotonPlayer), (byte)'P', (buf, obj) =>
+            Types.BinExtendCustomType(typeof(PhotonPlayer), (byte)'P', (buf, obj) =>
             {
                 PhotonPlayer val = (PhotonPlayer)obj;
                 buf.PushInt(val.ID);
