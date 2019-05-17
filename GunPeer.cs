@@ -12,7 +12,9 @@ using itfantasy.gun.nets;
 using itfantasy.gun.nets.ws;
 #endif
 using itfantasy.gun.nets.kcp;
-using itfantasy.gun.gnbuffers;
+using itfantasy.gun.core.binbuf;
+
+using Types = itfantasy.gun.core.binbuf.Types;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -173,7 +175,7 @@ namespace itfantasy.gunpeer
         {
             LogCustomOp(customOpCode, customOpParameters);
 #if GUN_SDK
-            var buffer = new GnBuffer(1024);
+            var buffer = new BinBuffer(1024);
             buffer.PushByte(customOpCode);
             if (customOpParameters != null)
             {
@@ -239,7 +241,7 @@ namespace itfantasy.gunpeer
 
         public void OnMsg(byte[] msg)
         {
-            var parser = new GnParser(msg, 0);
+            var parser = new BinParser(msg, 0);
             byte sign = parser.Byte();
             if (sign == 0) // response
             {
@@ -324,7 +326,7 @@ namespace itfantasy.gunpeer
 
         private void ExtendsUnityTypes()
         {
-            GnTypes.GnExtendCustomType(typeof(Vector2), (byte)'W', (buf, obj) =>
+            Types.BinExtendCustomType(typeof(Vector2), (byte)'W', (buf, obj) =>
             {
                 Vector2 val = (Vector2)obj;
                 buf.PushFloat(val.x);
@@ -337,7 +339,7 @@ namespace itfantasy.gunpeer
                 return val;
             });
 
-            GnTypes.GnExtendCustomType(typeof(Vector3), (byte)'V', (buf, obj) =>
+            Types.BinExtendCustomType(typeof(Vector3), (byte)'V', (buf, obj) =>
             {
                 Vector3 val = (Vector3)obj;
                 buf.PushFloat(val.x);
@@ -352,7 +354,7 @@ namespace itfantasy.gunpeer
                 return val;
             });
 
-            GnTypes.GnExtendCustomType(typeof(Quaternion), (byte)'Q', (buf, obj) =>
+            Types.BinExtendCustomType(typeof(Quaternion), (byte)'Q', (buf, obj) =>
             {
                 Quaternion val = (Quaternion)obj;
                 buf.PushFloat(val.w);
