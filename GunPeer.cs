@@ -296,7 +296,7 @@ namespace itfantasy.gunpeer
             }
         }
 
-        public void OnClose()
+        public void OnClose(error reason)
         {
             //Listener.OnStatusChanged(StatusCode.Disconnect);
             curStatus = StatusCode.Disconnect;
