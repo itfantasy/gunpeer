@@ -1,5 +1,5 @@
 ﻿#define GUN_SDK
-#define FULL_LOG
+//#define FULL_LOG
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +24,7 @@ namespace itfantasy.gunpeer
 {
     public class GunPeer : PhotonPeer, INetEventListener
     {
-        
+
         INetWorker netWorker;
         ConnectionProtocol protocolType;
 
@@ -176,6 +176,17 @@ namespace itfantasy.gunpeer
         {
             LogCustomOp(customOpCode, customOpParameters);
 #if GUN_SDK
+            if (customOpCode == 253)
+            {
+                if (!customOpParameters.ContainsKey(246))
+                {
+                    customOpParameters[246] = (byte)0;
+                }
+                if (!customOpParameters.ContainsKey(247))
+                {
+                    customOpParameters[247] = (byte)0;
+                }
+            }
             var buffer = new BinBuffer(1024);
             buffer.PushByte(customOpCode);
             if (customOpParameters != null)
@@ -403,7 +414,7 @@ namespace itfantasy.gunpeer
 #if FULL_LOG
             Debug.Log("==============> Sending a message...");
 #endif
-            Debug.Log("customOpCode:" +  customOpCode.ToString());
+            Debug.Log("customOpCode:" + customOpCode.ToString());
 #if FULL_LOG
             Debug.Log("customOpParameters:");
             try
